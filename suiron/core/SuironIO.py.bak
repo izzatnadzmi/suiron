@@ -1,7 +1,5 @@
 import time
 import random
-import socket
-import struct
 import numpy as np
 import pandas as pd
 import cv2, os, serial, csv
@@ -10,7 +8,6 @@ import matplotlib.pyplot as plt
 from suiron.utils.functions import cnn_to_raw
 from suiron.utils.img_serializer import serialize_image
 from suiron.utils.file_finder import get_new_filename
-from suiron.socket.controller import Server
 
 class SuironIO:
     """
@@ -20,7 +17,7 @@ class SuironIO:
     """
 
     # Constructor
-    def __init__(self, width=72, height=48, depth=3, serial_location='/dev/ttyUSB0', baudrate=9600, host='', port=5050):
+    def __init__(self, width=72, height=48, depth=3, serial_location='/dev/ttyUSB0', baudrate=57600):
         # Image settings
         self.width = int(width)
         self.height = int(height)
@@ -35,12 +32,6 @@ class SuironIO:
             print('Found %s, starting to read from it...' % serial_location)
             self.ser = serial.Serial(serial_location, baudrate)        
         self.outfile = None        
-
-        # Controller IO
-        self.ctrl = None
-        print('Hosting server')
-        self.ctrl, self.addr = Server(host, port).listen()
-        print('Server hosted')
 
         # In-memory variable to record data
         # to prevent too much I/O
@@ -71,8 +62,6 @@ class SuironIO:
             servo = serial_inputs['servo'] 
             motor = serial_inputs['motor'] 
 
-            self.servo_test(servo, motor)
-
             # Append to memory
             # tolist so it actually appends the entire thing
             self.frame_results.append(serialize_image(frame))
@@ -82,14 +71,11 @@ class SuironIO:
     # Get motor inputs, steering inputs etc
     def get_serial(self):
         # For debugging
-        serial_raw = '-1,-1,-1\n'
-        # if self.ser:
-        #     # Polling for consistent data
-        #     self.ser.write('d')
-        #     serial_raw = self.ser.readline()
-        if self.ctrl:
-            serial_raw = self.ctrl.recv(102)
-            # print(repr(serial_raw))
+        serial_raw = '-1,-1\n'
+        if self.ser:
+            # Polling for consistent data
+            self.ser.write('d')
+            serial_raw = self.ser.readline()
         serial_processed = self.normalize_serial(serial_raw)
         return serial_processed
 
@@ -128,8 +114,8 @@ class SuironIO:
         # 'error' basically means that 
         # its in manual mode
         try:
-            line = line.split('\x00', 1)[0].split(', ')
-            line_dict = {'mode': line[0],'motor': int(line[1]), 'servo': int(line[2])}
+            line = line.replace('\n', '').split(',')
+            line_dict = {'servo': int(line[0]), 'motor': int(line[1])}
             return line_dict
         except:
             return None
@@ -151,12 +137,6 @@ class SuironIO:
         }
         df = pd.DataFrame(raw_data, columns=['image', 'servo', 'motor'])
         df.to_csv(self.outfile)
-        df = df.to_csv()
-        
-        sock=socket.socket(socket.AF_INET,socket.SOCK_STREAM)
-        sock.connect(('192.168.0.164',5051))
-        sock.sendall(struct.pack('>i', len(df))+df)
-        sock.close() 
 
     """ Functions below are used for ouputs (controlling servo/motor) """    
     # Controls the servo given the numpy array outputted by
@@ -186,10 +166,6 @@ class SuironIO:
     # Staightens servos
     def servo_straighten(self):
         self.ser.write('steer,90')
-        time.sleep(0.02)
-
-    def servo_test(self, steer, motor):
-        self.ser.write('steer, ' + str(motor) + ', '+ str(steer) + '\n')
         time.sleep(0.02)
         
     def __del__(self):

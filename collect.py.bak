@@ -11,10 +11,8 @@ with open('settings.json') as d:
     SETTINGS = json.load(d)
 
 # Instantiatees our IO class
-print('Initialising...')
-suironio = SuironIO(width=SETTINGS['width'], height=SETTINGS['height'], depth=SETTINGS['depth'], baudrate=9600, host='')
-print('Done Init...')
-suironio.init_saving()  # open fileout
+suironio = SuironIO(width=SETTINGS['width'], height=SETTINGS['height'], depth=SETTINGS['depth'])
+suironio.init_saving()
 
 # Allows time for the camerae to warm up
 print('Warming up...')
