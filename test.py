@@ -39,4 +39,4 @@ while True:
     df = df.to_csv()
     sock.sendall(struct.pack('>i', len(df))+df)
     # sock.sendall(struct.pack('>i', len(data))+data)
-    print "response: ", sock.recv(1024)
+    print("response: ", sock.recv(1024))
