@@ -1,4 +1,5 @@
-# Suiron
+# Suiron for LatteCar
+
 ### Machine Learning for RC Cars 
 
 ## Prediction visualization (green = actual, blue = prediction)
@@ -40,7 +41,14 @@ python train.py
 python visualize_predict.py
 ```
 
+# Hardware
+
+Lattepanda-4GB version with Arduino Leonardo builtin
+NVIDIA 10-series GPU with CUDA enabled
+
 # References
+
+Original Author - [Github - Kendricktan](https://github.com/kendricktan/suiron)
 
 Blog Post detailing how the hardware and software communicate - [Communicating between RC Car and the On-board Computer - Jabelone](http://jabelone.com.au/blog/make-autonomous-car-code-included/)
 

@@ -27,16 +27,16 @@ def visualize_data(filename, width=72, height=48, depth=3, cnn_model=None):
         cur_img_array = cv2.resize(cur_img_array, (480, 320), interpolation=cv2.INTER_CUBIC)
 
         # Extra debugging info (e.g. steering etc)
-        cv2.putText(cur_img_array, "frame: %s" % str(cur_steer), (5,35), cv2.FONT_HERSHEY_SIMPLEX, 1, 255)
-        cv2.putText(cur_img_array, "steering: %s" % str(cur_throttle), (5,70), cv2.FONT_HERSHEY_SIMPLEX, 1, 255)
-        cv2.putText(cur_img_array, "throttle: %s" % str(i), (5, 105), cv2.FONT_HERSHEY_SIMPLEX, 1, 255)
+        cv2.putText(cur_img_array, "steering: %s" % str(cur_steer), (5,35), cv2.FONT_HERSHEY_SIMPLEX, 1, 255)
+        cv2.putText(cur_img_array, "throttle: %s" % str(cur_throttle), (5,70), cv2.FONT_HERSHEY_SIMPLEX, 1, 255)
+        cv2.putText(cur_img_array, "frame: %s" % str(i), (5, 105), cv2.FONT_HERSHEY_SIMPLEX, 1, 255)
 
         # Steering line
         cv2.line(cur_img_array, (240, 300), (240+(cur_steer/2), 200), (0, 255, 0), 3)
 
         # Throttle line
         # RGB
-        cv2.line(cur_img_array, (50, 160), (50, 160+(cur_throttle)), raw_motor_to_rgb(cur_throttle), 3)
+        cv2.line(cur_img_array, (430, 160), (430, 160-(cur_throttle)), raw_motor_to_rgb(cur_throttle), 3)
 
         # If we wanna visualize our cnn_model
         if cnn_model:
@@ -51,7 +51,7 @@ def visualize_data(filename, width=72, height=48, depth=3, cnn_model=None):
             x_ = abs(servo_out/2)
             motor_out = (7.64*np.e**(-0.096*x_)) - 1
             motor_out = int(80 - motor_out) # Only wanna go forwards
-            cv2.line(cur_img_array, (100, 160), (100, 160-(90-motor_out)), raw_motor_to_rgb(motor_out), 3)
+            cv2.line(cur_img_array, (400, 160), (400, 160-(90-motor_out)), raw_motor_to_rgb(motor_out), 3)
             print(motor_out, cur_steer)
 
         # Show frame
