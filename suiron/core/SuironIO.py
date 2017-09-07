@@ -20,7 +20,7 @@ class SuironIO:
     """
 
     # Constructor
-    def __init__(self, width=72, height=48, depth=3, serial_location='/dev/ttyUSB0', baudrate=9600, host='', port=5050):
+    def __init__(self, width=72, height=48, depth=3, serial_location='/dev/ttyACM0', baudrate=9600, host='', port=5050):
         # Image settings
         self.width = int(width)
         self.height = int(height)
@@ -47,6 +47,8 @@ class SuironIO:
         self.frame_results = []
         self.servo_results = []
         self.motorspeed_results = [] 
+
+        self.End = b'LOOOOLDFSODJOSSD'
     
     """ Functions below are used for inputs (recording data) """
     # Initialize settings before saving 
@@ -65,7 +67,7 @@ class SuironIO:
 
         # Serial inputs is a dict with key 'servo', and 'motor'
         serial_inputs = self.get_serial()
-
+        print(serial_inputs)
         # If its not in manual mode then proceed
         if serial_inputs:
             servo = serial_inputs['servo'] 
@@ -128,8 +130,11 @@ class SuironIO:
         # 'error' basically means that 
         # its in manual mode
         try:
-            line = line.split('\x00', 1)[0].split(', ')
+            # line = line.decode("utf-8").split('\x00', 1)[0].split(', ')
+            line = line.split(b'\x00', 1)[0].split(b', ')
+            print(repr(line))
             line_dict = {'mode': line[0],'motor': int(line[1]), 'servo': int(line[2])}
+            print(repr(line_dict))
             return line_dict
         except:
             return None
@@ -151,11 +156,14 @@ class SuironIO:
         }
         df = pd.DataFrame(raw_data, columns=['image', 'servo', 'motor'])
         df.to_csv(self.outfile)
-        df = df.to_csv()
-        
+        df = df.to_csv().encode()
+        print(type(df))
         sock=socket.socket(socket.AF_INET,socket.SOCK_STREAM)
         sock.connect(('192.168.0.164',5051))
-        sock.sendall(struct.pack('>i', len(df))+df)
+        # sizee = struct.pack('>i', len(df))
+        # print(sizee)
+        # sock.sendall(sizee+df)
+        sock.sendall(df+self.End)
         sock.close() 
 
     """ Functions below are used for ouputs (controlling servo/motor) """    
@@ -189,7 +197,8 @@ class SuironIO:
         time.sleep(0.02)
 
     def servo_test(self, steer, motor):
-        self.ser.write('steer, ' + str(motor) + ', '+ str(steer) + '\n')
+        serialBytes = 'steer, ' + str(motor) + ', '+ str(steer) + '\n'
+        self.ser.write(serialBytes.encode())
         time.sleep(0.02)
         
     def __del__(self):

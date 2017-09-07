@@ -20,14 +20,14 @@ suironio.init_saving()  # open fileout
 print('Warming up...')
 time.sleep(5)
 
-raw_input('Press any key to conitnue')
+input('Press any key to conitnue')
 print('Recording data...')
 while True:
     try:
         suironio.record_inputs()
     except KeyboardInterrupt:
         break
-    
 
 print('Saving file...')
 suironio.save_inputs()
+print('Done!')
