@@ -21,7 +21,7 @@ def get_servo_dataset(filename, start_index=0, end_index=None):
 
     for i in data.index[start_index:end_index]:
         # Don't want noisy data
-        if data['servo'][i] < -100 or data['servo'][i] > 100 :
+        if data['servo'][i] < 50 or data['servo'][i] > 150 :
             continue
 
         # Append
@@ -44,14 +44,14 @@ def get_motor_dataset(filename, start_index=0, end_index=None):
 
     for i in data.index[start_index:end_index]:
         # Don't want noisy data
-        if data['motor'][i] < -100 or data['motor'][i] > 100:
+        if data['motor'][i] < 50 or data['motor'][i] > 150:
             continue
 
-        if data['servo'][i] < 40 or data['servo'][i] > 150:
+        if data['servo'][i] < 50 or data['servo'][i] > 150:
             continue
 
         # Append
         servo.append(raw_to_cnn(data['servo'][i]))
-        motor.append(raw_to_cnn(data['motor'][i], min_arduino=-100, max_arduino=100))
+        motor.append(raw_to_cnn(data['motor'][i], min_arduino=50, max_arduino=150))
 
     return servo, motor

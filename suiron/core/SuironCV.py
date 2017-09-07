@@ -1,7 +1,7 @@
 """
 SuironCV contains functions that does some preprocessing on the images
 before it is fed into the feed forward network
-""""
+"""
 import math
 import cv2
 import numpy as np

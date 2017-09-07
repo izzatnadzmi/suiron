@@ -55,7 +55,7 @@ def get_cnn_model(checkpoint_path='cnn_servo_model', width=72, height=48, depth=
 
     # Verbosity yay nay
     # 0 = nothing
-    model = tflearn.DNN(network, tensorboard_verbose=2, checkpoint_path=checkpoint_path, session=session) 
+    model = tflearn.DNN(network, tensorboard_verbose=0, checkpoint_path=checkpoint_path, session=session)
     return model
 
 # Simple One hidden layer NN to determine the (linear?) relationship between 
