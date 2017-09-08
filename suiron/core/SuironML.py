@@ -8,6 +8,8 @@ from tflearn.layers.conv import conv_2d, max_pool_2d
 from tflearn.layers.normalization import local_response_normalization
 from tflearn.layers.estimator import regression
 
+
+
 # NVIDIA's CNN architecture  
 # (used for unprocessed data)
 def get_cnn_model(checkpoint_path='cnn_servo_model', width=72, height=48, depth=3, session=None):

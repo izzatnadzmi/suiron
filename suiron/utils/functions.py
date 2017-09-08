@@ -42,3 +42,17 @@ def raw_motor_to_rgb(x):
             return (255, 165, 0)
         else:
             return (0, 255, 0)
+
+def remapvalue(OldValue):
+    OldMax = 100
+    OldMin = -100
+    NewMax = 150
+    NewMin = 50
+
+    OldRange = (OldMax - OldMin)
+    NewRange = (NewMax - NewMin)
+    NewValue = (((OldValue - OldMin) * NewRange) / OldRange) + NewMin
+
+    NewValue = int(NewValue)
+
+    return abs(NewValue)

@@ -2,7 +2,7 @@ import numpy as np
 import cv2
 import pandas as pd
 
-from suiron.utils.functions import raw_to_cnn, cnn_to_raw, raw_motor_to_rgb
+from suiron.utils.functions import raw_to_cnn, cnn_to_raw, raw_motor_to_rgb, remapvalue
 from suiron.utils.img_serializer import deserialize_image
 
 # Visualize images
@@ -16,8 +16,10 @@ def visualize_data(filename, width=72, height=48, depth=3, cnn_model=None):
 
     for i in data.index:
         cur_img = data['image'][i]
-        cur_steer = int(data['servo'][i])
-        cur_throttle = int(data['motor'][i])
+        xj = int(data['servo'][i])
+        cur_steer = remapvalue(xj)
+        yj = int(data['motor'][i])
+        cur_throttle = remapvalue(yj)
         
         # [1:-1] is used to remove '[' and ']' from string 
         cur_img_array = deserialize_image(cur_img)        

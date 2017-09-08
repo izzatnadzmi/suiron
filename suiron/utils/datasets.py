@@ -7,7 +7,7 @@ import numpy as np
 import pandas as pd
 
 from suiron.utils.img_serializer import deserialize_image
-from suiron.utils.functions import raw_to_cnn
+from suiron.utils.functions import raw_to_cnn, remapvalue
 
 # Gets servo dataset
 def get_servo_dataset(filename, start_index=0, end_index=None):
@@ -21,18 +21,21 @@ def get_servo_dataset(filename, start_index=0, end_index=None):
 
     for i in data.index[start_index:end_index]:
         # Don't want noisy data
-        if data['servo'][i] < 50 or data['servo'][i] > 150 :
+        xj = data['servo'][i]
+
+        if xj < 50 or xj > 150 :
             continue
 
         # Append
         x.append(deserialize_image(data['image'][i]))
-        servo.append(raw_to_cnn(data['servo'][i]))
+        servo.append(raw_to_cnn(remapvalue(xj)))
 
     return x, servo
 
 # Gets motor output dataset
 # Assumption is that motor and servo has
 # some sort of relationship
+# Ignore mapping for motor and servo at same time
 def get_motor_dataset(filename, start_index=0, end_index=None):
     data = pd.DataFrame.from_csv(filename)
 
