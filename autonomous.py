@@ -12,7 +12,7 @@ with open('settings.json') as d:
 
 # IO Class to serial ports (read and write em)
 print('Initiating I/O operations...')
-suironio = SuironIO(width=SETTINGS['width'], height=SETTINGS['height'], depth=SETTINGS['depth'])
+suironio = SuironIO(width=SETTINGS['width'], height=SETTINGS['height'], depth=SETTINGS['depth'], mode='auto')
 suironio.init_saving()
 suironio.motor_stop()
 

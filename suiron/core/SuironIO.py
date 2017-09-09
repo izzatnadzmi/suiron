@@ -20,7 +20,7 @@ class SuironIO:
     """
 
     # Constructor
-    def __init__(self, width=72, height=48, depth=3, serial_location='/dev/ttyACM0', baudrate=9600, host='', port=5050):
+    def __init__(self, width=72, height=48, depth=3, serial_location='/dev/ttyACM0', baudrate=9600, host='', port=5050, mode='collect'):
         # Image settings
         self.width = int(width)
         self.height = int(height)
@@ -38,9 +38,10 @@ class SuironIO:
 
         # Controller IO
         self.ctrl = None
-        print('Hosting server')
-        self.ctrl, self.addr = Server(host, port).listen()
-        print('Server hosted')
+        if self.mode == 'collect':
+            print('Hosting server')
+            self.ctrl, self.addr = Server(host, port).listen()
+            print('Server hosted')
 
         # In-memory variable to record data
         # to prevent too much I/O
@@ -178,26 +179,27 @@ class SuironIO:
         elif (servo_out > 90):
             servo_out *= 1.15
 
-        self.ser.write('steer,' + str(servo_out) + '\n') 
+        serialBytes = 'mode, 30, ' + str(servo_out) + '\n'
+        self.ser.write(serialBytes.encode()) 
         time.sleep(0.02)
 
     # Sets the motor at a fixed speed
     def motor_write_fixed(self):    
-        self.ser.write('motor,80\n')
+        self.ser.write('mode, 50, 0\n'.encode())
         time.sleep(0.02)
 
     # Stops motors
     def motor_stop(self):      
-        self.ser.write('motor,90\n')
+        self.ser.write('mode, 0, 0\n'.encode())
         time.sleep(0.02)
 
     # Staightens servos
     def servo_straighten(self):
-        self.ser.write('steer,90')
+        self.ser.write('mode, 0, 0\n'.encode())
         time.sleep(0.02)
 
     def servo_test(self, steer, motor):
-        serialBytes = 'steer, ' + str(motor) + ', '+ str(steer) + '\n'
+        serialBytes = 'mode, ' + str(motor) + ', '+ str(steer) + '\n'
         self.ser.write(serialBytes.encode())
         time.sleep(0.02)
         
