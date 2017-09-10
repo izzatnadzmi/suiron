@@ -101,3 +101,5 @@ cnn_*
 nn_*
 checkpoint
 *.ckpt
+
+.idea/
