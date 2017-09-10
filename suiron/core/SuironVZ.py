@@ -23,6 +23,11 @@ def visualize_data(filename, width=72, height=48, depth=3, cnn_model=None):
         cur_img_array = deserialize_image(cur_img)        
         y_input = cur_img_array.copy() # NN input
 
+        minRGB = np.array([0, 0, 41])
+        maxRGB = np.array([88, 88, 255])
+        maskRGB = cv2.inRange(cur_img_array,minRGB,maxRGB)
+        cur_img_array = cv2.bitwise_and(cur_img_array, cur_img_array, mask = maskRGB)
+
         # And then rescale it so we can more easily preview it
         cur_img_array = cv2.resize(cur_img_array, (480, 320), interpolation=cv2.INTER_CUBIC)
 
@@ -32,7 +37,7 @@ def visualize_data(filename, width=72, height=48, depth=3, cnn_model=None):
         cv2.putText(cur_img_array, "frame: %s" % str(i), (5, 105), cv2.FONT_HERSHEY_SIMPLEX, 1, 255)
 
         # Steering line
-        cv2.line(cur_img_array, (240, 300), (240+(cur_steer/2), 200), (0, 255, 0), 3)
+        cv2.line(cur_img_array, (240, 300), (240+int(cur_steer/2), 200), (0, 255, 0), 3)
 
         # Throttle line
         # RGB
@@ -56,6 +61,13 @@ def visualize_data(filename, width=72, height=48, depth=3, cnn_model=None):
 
         # Show frame
         # Convert to BGR cause thats how OpenCV likes it
-        cv2.imshow('frame', cv2.cvtColor(cur_img_array, cv2.COLOR_RGB2BGR))
+        image = cv2.cvtColor(cur_img_array, cv2.COLOR_RGB2BGR)
+
+        # minBGR = np.array([0, 0, 0])
+        # maxBGR = np.array([255, 107, 66])
+        # maskBGR = cv2.inRange(image,minBGR,maxBGR)
+        # resultBGR = cv2.bitwise_and(image, image, mask = maskBGR)
+
+        cv2.imshow('frame', image)
         if cv2.waitKey(0) & 0xFF == ord('q'):
             break

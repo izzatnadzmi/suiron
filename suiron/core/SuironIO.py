@@ -119,6 +119,11 @@ class SuironIO:
         frame = cv2.resize(frame, (self.width, self.height), interpolation=cv2.INTER_CUBIC)
         frame = frame.astype('uint8')
 
+        minRGB = np.array([0, 0, 41])
+        maxRGB = np.array([88, 88, 255])
+        maskRGB = cv2.inRange(frame,minRGB,maxRGB)
+        frame = cv2.bitwise_and(frame, frame, mask = maskRGB)
+
         return frame
     
 

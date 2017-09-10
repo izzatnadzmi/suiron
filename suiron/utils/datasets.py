@@ -25,7 +25,14 @@ def get_servo_dataset(filename, start_index=0, end_index=None):
             continue
 
         # Append
-        x.append(deserialize_image(data['image'][i]))
+        image = deserialize_image(data['image'][i])
+
+        minRGB = np.array([0, 0, 41])
+        maxRGB = np.array([88, 88, 255])
+        maskRGB = cv2.inRange(image,minRGB,maxRGB)
+        image = cv2.bitwise_and(image, image, mask = maskRGB)
+
+        x.append(image)
         servo.append(raw_to_cnn(data['servo'][i]))
 
     return x, servo
