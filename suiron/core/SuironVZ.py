@@ -23,8 +23,8 @@ def visualize_data(filename, width=72, height=48, depth=3, cnn_model=None):
         cur_img_array = deserialize_image(cur_img)        
         y_input = cur_img_array.copy() # NN input
 
-        minRGB = np.array([0, 0, 41])
-        maxRGB = np.array([88, 88, 255])
+        minRGB = np.array([68, 63, 48])
+        maxRGB = np.array([255, 255, 255])
         maskRGB = cv2.inRange(cur_img_array,minRGB,maxRGB)
         cur_img_array = cv2.bitwise_and(cur_img_array, cur_img_array, mask = maskRGB)
 
