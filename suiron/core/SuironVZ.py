@@ -52,7 +52,6 @@ def visualize_data(filename, width=72, height=48, depth=3, cnn_model=None):
             y = cnn_model.predict([y_input])
             servo_out = cnn_to_raw(y[0])         
             cv2.line(cur_img_array, (240, 300), (240+(int(servo_out/2)), 200), (0, 0, 255), 3)
-
             cv2.putText(cur_img_array, "steering: %s" % str(cur_steer), (245, 35), cv2.FONT_HERSHEY_SIMPLEX, 1, (0,0,255))
             cv2.putText(cur_img_array, "throttle: %s" % str(cur_throttle), (245, 70), cv2.FONT_HERSHEY_SIMPLEX, 1, (0,0,255))
             # Can determine the motor our with a simple exponential equation
