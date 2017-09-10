@@ -2,7 +2,7 @@ import numpy as np
 import cv2
 import pandas as pd
 
-from suiron.utils.functions import raw_to_cnn, cnn_to_raw, raw_motor_to_rgb
+from suiron.utils.functions import raw_to_cnn, cnn_to_raw, raw_motor_to_rgb ,raw_predict_to_rgb
 from suiron.utils.img_serializer import deserialize_image
 
 # Visualize images
@@ -37,7 +37,11 @@ def visualize_data(filename, width=72, height=48, depth=3, cnn_model=None):
         cv2.putText(cur_img_array, "frame: %s" % str(i), (5, 105), cv2.FONT_HERSHEY_SIMPLEX, 1, 255)
 
         # Steering line
+<<<<<<< HEAD
         cv2.line(cur_img_array, (240, 300), (240+int(cur_steer/2), 200), (0, 255, 0), 3)
+=======
+        cv2.line(cur_img_array, (240, 300), (240+(int(cur_steer/2)), 200), (0, 255, 0), 3)
+>>>>>>> 92c72f2e7c7e3fb2efab1d3fd6eccdc3133c6003
 
         # Throttle line
         # RGB
@@ -49,6 +53,8 @@ def visualize_data(filename, width=72, height=48, depth=3, cnn_model=None):
             servo_out = cnn_to_raw(y[0])         
             cv2.line(cur_img_array, (240, 300), (240+(int(servo_out/2)), 200), (0, 0, 255), 3)
 
+            cv2.putText(cur_img_array, "steering: %s" % str(cur_steer), (245, 35), cv2.FONT_HERSHEY_SIMPLEX, 1, (0,0,255))
+            cv2.putText(cur_img_array, "throttle: %s" % str(cur_throttle), (245, 70), cv2.FONT_HERSHEY_SIMPLEX, 1, (0,0,255))
             # Can determine the motor our with a simple exponential equation
             # x = abs(servo_out-90)
             # motor_out = (7.64*e^(-0.096*x)) - 1
@@ -56,7 +62,7 @@ def visualize_data(filename, width=72, height=48, depth=3, cnn_model=None):
             x_ = abs(servo_out/2)
             motor_out = (7.64*np.e**(-0.096*x_)) - 1
             motor_out = int(80 - motor_out) # Only wanna go forwards
-            cv2.line(cur_img_array, (400, 160), (400, 160-(90-motor_out)), raw_motor_to_rgb(motor_out), 3)
+            cv2.line(cur_img_array, (400, 160), (400, 160-(90-motor_out)), raw_predict_to_rgb(motor_out), 3)
             print(motor_out, cur_steer)
 
         # Show frame

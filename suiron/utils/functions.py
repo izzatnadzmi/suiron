@@ -42,3 +42,19 @@ def raw_motor_to_rgb(x):
             return (255, 165, 0)
         else:
             return (0, 255, 0)
+
+def raw_predict_to_rgb(x):
+    if x <= 0:
+        if x < -30:
+            return (0, 0, 255)
+        elif x < -10:
+            return (0, 165, 255)
+        else:
+            return (0, 255, 0)
+    elif x > 0:
+        if x > 30:
+            return (0, 0, 255)
+        elif x > 10:
+            return (0, 165, 255)
+        else:
+            return (0, 255, 0)
