@@ -37,11 +37,8 @@ def visualize_data(filename, width=72, height=48, depth=3, cnn_model=None):
         cv2.putText(cur_img_array, "frame: %s" % str(i), (5, 105), cv2.FONT_HERSHEY_SIMPLEX, 1, 255)
 
         # Steering line
-<<<<<<< HEAD
         cv2.line(cur_img_array, (240, 300), (240+int(cur_steer/2), 200), (0, 255, 0), 3)
-=======
-        cv2.line(cur_img_array, (240, 300), (240+(int(cur_steer/2)), 200), (0, 255, 0), 3)
->>>>>>> 92c72f2e7c7e3fb2efab1d3fd6eccdc3133c6003
+        # cv2.line(cur_img_array, (240, 300), (240+(int(cur_steer/2)), 200), (0, 255, 0), 3)
 
         # Throttle line
         # RGB
