@@ -5,6 +5,7 @@ numpy arrays which can be fed into the CNN/NN
 
 import numpy as np
 import pandas as pd
+import cv2
 
 from suiron.utils.img_serializer import deserialize_image
 from suiron.utils.functions import raw_to_cnn
