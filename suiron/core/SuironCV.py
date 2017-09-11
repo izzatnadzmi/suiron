@@ -1,10 +1,14 @@
 """
 SuironCV contains functions that does some preprocessing on the images
 before it is fed into the feed forward network
-""""
+"""
 import math
 import cv2
 import numpy as np
+import sys
+sys.path.append(r'/home/ubuntuml/PycharmProjects/suiron')
+
+from suiron.utils.helperfunctions import *
 
 # Median blur
 def get_median_blur(gray_frame):
@@ -45,3 +49,81 @@ def get_lane_lines(inframe):
                 cv2.line(ret_frame, (x1, y1), (x2, y2), (255, 255, 255), 10)
 
     return ret_frame
+
+def wrap_for_lanes(frame, height=480, width=640, ratio=10):
+    tl = [220/ratio, 170/ratio]
+    tr = [410/ratio, 170/ratio]
+    bl = [0/ratio, 320/ratio]
+    br = [640/ratio, 310/ratio]
+
+    tlm = [40/ratio,0/ratio]
+    trm = [600/ratio,0/ratio]
+    blm = [600/ratio,480/ratio]
+    brm = [40/ratio,480/ratio]
+
+    src = np.float32([tl,tr,br,bl])
+    dst = np.float32([tlm,trm,brm,blm])
+
+    M = cv2.getPerspectiveTransform(src, dst)
+    frame = cv2.warpPerspective(frame, M, (width/ratio, height/ratio), flags=cv2.INTER_LINEAR)
+
+    return frame
+
+def filter_for_lanes(frame,height=480, width=640, ratio=10):
+    tl = [220/ratio, 170/ratio]
+    tr = [410/ratio, 170/ratio]
+    bl = [0/ratio, 320/ratio]
+    br = [640/ratio, 310/ratio]
+
+    tlm = [40/ratio,0/ratio]
+    trm = [600/ratio,0/ratio]
+    blm = [600/ratio,480/ratio]
+    brm = [40/ratio,480/ratio]
+
+    frame = cv2.resize(frame, (width, height), interpolation=cv2.INTER_CUBIC)
+    mframe = frame.astype('uint8')
+
+    src = np.float32([tl,tr,br,bl])
+    dst = np.float32([tlm,trm,brm,blm])
+
+    M = cv2.getPerspectiveTransform(src, dst)
+    Minv = cv2.getPerspectiveTransform(dst, src)
+
+    blank_canvas = np.zeros((height, width))
+    colour_canvas = cv2.cvtColor(blank_canvas.astype(np.uint8), cv2.COLOR_GRAY2RGB)
+    have_fit = False
+    while have_fit == False:
+        combined_binary = apply_threshold_v2(mframe, xgrad_thresh=xgrad_thresh_temp, s_thresh=s_thresh_temp)
+        warped = cv2.warpPerspective(combined_binary, M, (width, height), flags=cv2.INTER_LINEAR)
+
+        leftx, lefty, rightx, righty = histogram_pixels(warped, horizontal_offset=0)
+
+        if len(leftx) > 1 and len(rightx) > 1:
+            have_fit = True
+        xgrad_thresh_temp = (xgrad_thresh_temp[0] - 2, xgrad_thresh_temp[1] + 2)
+        s_thresh_temp = (s_thresh_temp[0] - 2, s_thresh_temp[1] + 2)
+
+    left_fit, left_coeffs = fit_second_order_poly(lefty, leftx, return_coeffs=True)
+    right_fit, right_coeffs = fit_second_order_poly(righty, rightx, return_coeffs=True)
+
+    y_eval = np.max(lefty)
+    left_curverad = ((1 + (2 * left_coeffs[0] * y_eval + left_coeffs[1]) ** 2) ** 1.5) \
+                    / np.absolute(2 * left_coeffs[0])
+    right_curverad = ((1 + (2 * right_coeffs[0] * y_eval + right_coeffs[1]) ** 2) ** 1.5) \
+                     / np.absolute(2 * right_coeffs[0])
+    curvature = (left_curverad + right_curverad) / 2
+    centre = center(319, left_coeffs, right_coeffs)
+
+    polyfit_left = draw_poly(blank_canvas, lane_poly, left_coeffs, 30)
+    polyfit_drawn = draw_poly(blank_canvas, lane_poly, right_coeffs, 30)
+
+    trace = colour_canvas
+    trace[polyfit_drawn > 1] = [0, 0, 255]
+    area = highlight_lane_line_area(polyfit_drawn, left_coeffs, right_coeffs)
+    trace[area == 1] = [0, 255, 0]
+
+    lane_lines = cv2.warpPerspective(trace, Minv, (width, height), flags=cv2.INTER_LINEAR)
+    frame = cv2.add(lane_lines, mframe)
+    #frame = cv2.resize(frame, (width/ratio, height/ratio), interpolation=cv2.INTER_CUBIC)
+
+    return frame
