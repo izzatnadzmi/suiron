@@ -523,7 +523,7 @@ def fit_second_order_poly(indep, dep, return_coeffs=False):
 def evaluate_poly(indep, poly_coeffs):
     return poly_coeffs[0]*indep**2 + poly_coeffs[1]*indep + poly_coeffs[2]
 
-def highlight_lane_line_area(mask_template, left_poly, right_poly, start_y=0, end_y =720):
+def highlight_lane_line_area(mask_template, left_poly, right_poly, start_y=0, end_y =480):
     area_mask = mask_template
     for y in range(start_y, end_y):
         left = evaluate_poly(y, left_poly)
@@ -576,7 +576,6 @@ def plausible_continuation_of_traces(left_coeffs, right_coeffs, prev_left_coeffs
         return True
 
 
-## 7. Warp the detected lane boundaries back onto the original image.¶
 
 def lane_poly(yval, poly_coeffs):
     """Returns x value for poly given a y-value.

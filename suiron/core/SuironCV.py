@@ -67,9 +67,10 @@ def wrap_for_lanes(frame, height=480, width=640, ratio=10):
     M = cv2.getPerspectiveTransform(src, dst)
     frame = cv2.warpPerspective(frame, M, (width/ratio, height/ratio), flags=cv2.INTER_LINEAR)
 
+
     return frame
 
-def filter_for_lanes(frame,height=480, width=640, ratio=10):
+def filter_for_lanes(frame,height=480, width=640, ratio=1, xgrad_thresh_temp = (10,100), s_thresh_temp = (20,100)):
     tl = [220/ratio, 170/ratio]
     tr = [410/ratio, 170/ratio]
     bl = [0/ratio, 320/ratio]
@@ -77,8 +78,8 @@ def filter_for_lanes(frame,height=480, width=640, ratio=10):
 
     tlm = [40/ratio,0/ratio]
     trm = [600/ratio,0/ratio]
-    blm = [600/ratio,480/ratio]
-    brm = [40/ratio,480/ratio]
+    blm = [40/ratio,480/ratio]
+    brm = [600/ratio,480/ratio]
 
     frame = cv2.resize(frame, (width, height), interpolation=cv2.INTER_CUBIC)
     mframe = frame.astype('uint8')
@@ -115,11 +116,11 @@ def filter_for_lanes(frame,height=480, width=640, ratio=10):
     centre = center(319, left_coeffs, right_coeffs)
 
     polyfit_left = draw_poly(blank_canvas, lane_poly, left_coeffs, 30)
-    polyfit_drawn = draw_poly(blank_canvas, lane_poly, right_coeffs, 30)
+    polyfit_drawn = draw_poly(polyfit_left, lane_poly, right_coeffs, 30)
 
     trace = colour_canvas
     trace[polyfit_drawn > 1] = [0, 0, 255]
-    area = highlight_lane_line_area(polyfit_drawn, left_coeffs, right_coeffs)
+    area = highlight_lane_line_area(polyfit_drawn, left_coeffs, right_coeffs, end_y =height)
     trace[area == 1] = [0, 255, 0]
 
     lane_lines = cv2.warpPerspective(trace, Minv, (width, height), flags=cv2.INTER_LINEAR)
