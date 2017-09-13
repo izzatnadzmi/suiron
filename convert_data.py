@@ -6,11 +6,15 @@ import cv2
 import pandas as pd
 
 filename = get_latest_filename()
+
+if len(sys.argv) > 1:
+    filename = sys.argv[1]
+    filename = "data/output_" + filename + ".csv"
 """
 When cnn_model is specified it'll show what the cnn_model predicts (red)
 as opposed to what inputs it actually received (green)
 """
-fileoutname = get_new_filename(folder='filtered_data', filename='output_', extension='.csv')
+fileoutname = get_new_filename(folder='edata', filename='output_', extension='.csv')
 outfile = open(fileoutname, 'w')
 outfile = open(fileoutname, 'a')
 
@@ -20,14 +24,20 @@ servo_results = []
 motorspeed_results = []
 for i in data.index:
     cur_img = data['image'][i]
-    servo_results = int(data['servo'][i])
-    motorspeed_results = int(data['motor'][i])
-
-        # [1:-1] is used to remove '[' and ']' from string
+    servo = data['servo'][i]
+    motor = data['motor'][i]
     cur_img_array = deserialize_image(cur_img)
+
     y_input = cur_img_array.copy()  # NN input
-    cur_img_array =  bw_rgb_filter(cur_img_array,48,64)
+    #
+    cur_img_array = bw_rgb_filter(cur_img_array, 48, 72)
+    cur_img_array = cur_img_array.flatten()
+    cur_img_array= cur_img_array.astype('uint8')
+
+
     frame_results.append(serialize_image(cur_img_array))
+    servo_results.append(servo)
+    motorspeed_results.append(motor)
     raw_data = {
         'image': frame_results,
         'servo': servo_results,

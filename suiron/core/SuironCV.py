@@ -134,15 +134,15 @@ def filter_for_lanes(frame,height=480, width=640, xgrad_thresh_temp = (10,100), 
 
     return frame
 
-def bw_rgb_filter (frame,height=480, width=640, xgrad_thresh = (30,110), s_thresh = (40,255)):
-    oriheight = 480
-    oriwidth = 640
-    ratio = int(oriwidth / width)
-
-    frame = cv2.resize(frame, (width/ratio, height/ratio), interpolation=cv2.INTER_CUBIC)
-    mframe = frame.astype('uint8')
-
-    minRGB = np.array([0, 10, 100])
+def bw_rgb_filter (frame,height=480, width=640, xgrad_thresh = (60,100), s_thresh = (80,250)):
+    offset = 0
+    offseth = 0
+    pts = np.array([[(offset), (offset)], [(width), (offset)], [(width), (height/3)],
+              [(offset), (height/3)]])
+    #frame = cv2.resize(frame, (width/ratio, height/ratio), interpolation=cv2.INTER_CUBIC)
+    #mframe = frame.astype('uint8')
+    mframe=frame
+    minRGB = np.array([0, 10, 0])
     maxRGB = np.array([255, 200, 255])
     maskRGB = cv2.inRange(mframe, minRGB, maxRGB)
     frame = cv2.bitwise_and(mframe, mframe, mask=maskRGB)
@@ -157,9 +157,12 @@ def bw_rgb_filter (frame,height=480, width=640, xgrad_thresh = (30,110), s_thres
     hls = cv2.cvtColor(frame, cv2.COLOR_RGB2HLS)
     s_channel = hls[:, :, 2]
     s_binary = np.zeros_like(s_channel)
+
     s_binary[(s_channel >= s_thresh[0]) & (s_channel <= s_thresh[1])] = 255
-
+    s_binary = cv2.fillPoly(s_binary, [pts], (0, 0, 0), 8)
     s_binary[(s_binary >= 150)] = 255
-    s_binary = cv2.cvtColor(s_binary, cv2.COLOR_GRAY2RGB)
+    color_binary = np.dstack((np.zeros_like(sxbinary), np.zeros_like(sxbinary), s_binary))
+    final = cv2.cvtColor(s_binary, cv2.COLOR_GRAY2RGB)
 
-    return s_binary,sxbinary, frame,
+
+    return color_binary
