@@ -70,16 +70,21 @@ def wrap_for_lanes(frame, height=480, width=640, ratio=10):
 
     return frame
 
-def filter_for_lanes(frame,height=480, width=640, ratio=1, xgrad_thresh_temp = (10,100), s_thresh_temp = (20,100)):
+def filter_for_lanes(frame,height=480, width=640, xgrad_thresh_temp = (10,100), s_thresh_temp = (20,100)):
+    oriheight = 480
+    oriwidth = 640
+    ratio = int(oriwidth/width)
+
     tl = [220/ratio, 170/ratio]
     tr = [410/ratio, 170/ratio]
     bl = [0/ratio, 320/ratio]
     br = [640/ratio, 310/ratio]
 
-    tlm = [40/ratio,0/ratio]
-    trm = [600/ratio,0/ratio]
-    blm = [40/ratio,480/ratio]
-    brm = [600/ratio,480/ratio]
+    tlm = [50/ratio,0/ratio]
+    trm = [590/ratio,0/ratio]
+    blm = [50/ratio,480/ratio]
+    brm = [590/ratio,480/ratio]
+
 
     frame = cv2.resize(frame, (width, height), interpolation=cv2.INTER_CUBIC)
     mframe = frame.astype('uint8')
@@ -98,7 +103,6 @@ def filter_for_lanes(frame,height=480, width=640, ratio=1, xgrad_thresh_temp = (
         warped = cv2.warpPerspective(combined_binary, M, (width, height), flags=cv2.INTER_LINEAR)
 
         leftx, lefty, rightx, righty = histogram_pixels(warped, horizontal_offset=0)
-
         if len(leftx) > 1 and len(rightx) > 1:
             have_fit = True
         xgrad_thresh_temp = (xgrad_thresh_temp[0] - 2, xgrad_thresh_temp[1] + 2)
@@ -120,6 +124,7 @@ def filter_for_lanes(frame,height=480, width=640, ratio=1, xgrad_thresh_temp = (
 
     trace = colour_canvas
     trace[polyfit_drawn > 1] = [0, 0, 255]
+    #print (left_coeffs)
     area = highlight_lane_line_area(polyfit_drawn, left_coeffs, right_coeffs, end_y =height)
     trace[area == 1] = [0, 255, 0]
 
@@ -128,3 +133,33 @@ def filter_for_lanes(frame,height=480, width=640, ratio=1, xgrad_thresh_temp = (
     #frame = cv2.resize(frame, (width/ratio, height/ratio), interpolation=cv2.INTER_CUBIC)
 
     return frame
+
+def bw_rgb_filter (frame,height=480, width=640, xgrad_thresh = (30,110), s_thresh = (40,255)):
+    oriheight = 480
+    oriwidth = 640
+    ratio = int(oriwidth / width)
+
+    frame = cv2.resize(frame, (width/ratio, height/ratio), interpolation=cv2.INTER_CUBIC)
+    mframe = frame.astype('uint8')
+
+    minRGB = np.array([0, 10, 100])
+    maxRGB = np.array([255, 200, 255])
+    maskRGB = cv2.inRange(mframe, minRGB, maxRGB)
+    frame = cv2.bitwise_and(mframe, mframe, mask=maskRGB)
+
+    gray = cv2.cvtColor(mframe, cv2.COLOR_RGB2GRAY)
+    sobelx = cv2.Sobel(gray, cv2.CV_64F, 1, 0)  # Take the derivative in x
+    abs_sobelx = np.absolute(sobelx)  # Absolute x derivative to accentuate lines away from horizontal
+    scaled_sobel = np.uint8(255 * abs_sobelx / np.max(abs_sobelx))
+    sxbinary = np.zeros_like(scaled_sobel)
+    sxbinary[(scaled_sobel >= xgrad_thresh[0]) & (scaled_sobel <= xgrad_thresh[1])] = 255
+
+    hls = cv2.cvtColor(frame, cv2.COLOR_RGB2HLS)
+    s_channel = hls[:, :, 2]
+    s_binary = np.zeros_like(s_channel)
+    s_binary[(s_channel >= s_thresh[0]) & (s_channel <= s_thresh[1])] = 255
+
+    s_binary[(s_binary >= 150)] = 255
+    s_binary = cv2.cvtColor(s_binary, cv2.COLOR_GRAY2RGB)
+
+    return s_binary,sxbinary, frame,
