@@ -11,6 +11,7 @@ from suiron.utils.functions import cnn_to_raw
 from suiron.utils.img_serializer import serialize_image
 from suiron.utils.file_finder import get_new_filename
 from suiron.socket.controller import Server
+from suiron.core.SuironCV import *
 
 class SuironIO:
     """
@@ -115,14 +116,11 @@ class SuironIO:
         if not ret:
             raise IOError('No image found!')
 
+        frame = main_filter(frame,48,72,filter="latest")
         frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
         frame = cv2.resize(frame, (self.width, self.height), interpolation=cv2.INTER_CUBIC)
         frame = frame.astype('uint8')
-
-        minRGB = np.array([0, 0, 41])
-        maxRGB = np.array([88, 88, 255])
-        maskRGB = cv2.inRange(frame,minRGB,maxRGB)
-        frame = cv2.bitwise_and(frame, frame, mask = maskRGB)
+        #move old filter to SuironCV function
 
         return frame
     
@@ -146,8 +144,10 @@ class SuironIO:
             return None
 
     # Normalizes frame so we don't have BGR as opposed to RGB
-    def normalize_frame(self, frame):
-        frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+    def normalize_frame(self, mframe):
+
+        #frame = main_filter(mframe,48,72,filter="latest")
+        frame = cv2.cvtColor(mframe, cv2.COLOR_BGR2RGB)
         frame = cv2.resize(frame, (self.width, self.height), interpolation=cv2.INTER_CUBIC)
         frame = frame.flatten()
         frame = frame.astype('uint8')

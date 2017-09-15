@@ -166,3 +166,18 @@ def bw_rgb_filter (frame,height=480, width=640, xgrad_thresh = (60,100), s_thres
 
 
     return color_binary
+
+def colour_lane_filter(frame,):
+    minRGB = np.array([0, 0, 41])
+    maxRGB = np.array([88, 88, 255])
+    maskRGB = cv2.inRange(frame, minRGB, maxRGB)
+    frame = cv2.bitwise_and(frame, frame, mask=maskRGB)
+    return frame
+
+def main_filter(frame, height=480, width = 640,filter = "latest"):
+
+    if (filter == "latest"):
+        final = bw_rgb_filter(frame,height,width)
+    else:
+        final = colour_lane_filter(frame)
+    return final
