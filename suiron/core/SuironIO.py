@@ -26,6 +26,7 @@ class SuironIO:
         self.width = int(width)
         self.height = int(height)
         self.depth = int(depth)
+        self.mode = mode
 
         # Video IO 
         self.cap =  cv2.VideoCapture(0) # Use first capture device

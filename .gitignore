@@ -103,3 +103,4 @@ checkpoint
 *.ckpt
 
 .idea/
+backup/
