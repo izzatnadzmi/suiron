@@ -13,15 +13,15 @@ uint8_t  steerPin = 9;
 uint8_t  motorPin = 10;
 uint8_t  togglePin = 11;
 
-int16_t  throttleVal;
-int8_t  steerVal;
+volatile int16_t  throttleVal;
+volatile int8_t  steerVal;
 String modeVal;
 String receivedArs[2];
 String receivedString;
 String receivedArr[2];
 
-int8_t mapsteerVal;
-int8_t mapthrottleVal;
+volatile int8_t mapsteerVal;
+volatile int8_t mapthrottleVal;
 
 
 // Setting for Fast PWM
@@ -35,6 +35,9 @@ int8_t mapthrottleVal;
 
 // convert duty (0..100) to PWM (0..255)
 #define DUTY2PWM(x)   ((255*(x))/100)
+
+// macro convert degree (0..180) to PWM (0..255)
+#define DEG2PWM(x)    ((255*(x))/180)
 
 
 // configure PWM clock for servo
@@ -114,7 +117,7 @@ void motordirtoggle(){
 
 void setup() {
   // put your setup code here, to run once:
-  // Serial.begin(115200);
+  Serial.begin(115200);
   // pinMode(steerPin, OUTPUT);
   // pinMode(motorPin, OUTPUT);
   // pinMode(togglePin, OUTPUT);
@@ -126,7 +129,7 @@ void setup() {
   pwm_clock_servo(servofreq);
   pwm_clock_throttle(throtlefreq);
 
-  pwmsetservo(DUTY2PWM(30));
+  pwmsetservo(DEG2PWM(23));
   pwmsetthrottle(DUTY2PWM(50));
   delay(1000);
 
@@ -136,32 +139,32 @@ volatile int value = 0;
 
 void loop() {
   // put your main code here, to run repeatedly:
-    //   if (Serial.available() > 0)
-    //   {
-    //     receivedString = Serial.readStringUntil('\n');
-    //     int com1index = receivedString.indexOf(',');
-    //     int com2index = receivedString.indexOf(',', com1index + 1);
-    //     receivedArr[0] = receivedString.substring(0,com1index);
-    //     receivedArr[1] = receivedString.substring(com1index + 1, com2index);
-    //     receivedArr[2] = receivedString.substring(com2index + 1);
-    //     steerVal = receivedArr[2].toInt();
-    //     throttleVal = receivedArr[1].toInt();
-    //     modeVal = receivedArr[0];
-    //   }
-    // mapsteerVal = map(steerVal,-100,100,0,46);
-    // mapthrottleVal = map(abs(throttleVal),0,100,0,255);
+  if (Serial.available() > 0)
+  {
+    receivedString = Serial.readStringUntil('\n');
+    int com1index = receivedString.indexOf(',');
+    int com2index = receivedString.indexOf(',', com1index + 1);
+    receivedArr[0] = receivedString.substring(0,com1index);
+    receivedArr[1] = receivedString.substring(com1index + 1, com2index);
+    receivedArr[2] = receivedString.substring(com2index + 1);
+    steerVal = receivedArr[2].toInt();
+    throttleVal = receivedArr[1].toInt();
+    modeVal = receivedArr[0];
+  }
+  mapsteerVal = map(steerVal,-100,100,0,46);
+  mapthrottleVal = DUTY2PWM(throttleVal);
     // steering.write(mapsteerVal);
-    // throttle(togglePin, motorPin, throttleVal, mapthrottleVal);
+  pwmsetservo(mapsteerVal);
+  throttle(togglePin, motorPin, throttleVal, mapthrottleVal);
 
-  // PWMPIN10 = DUTY2PWM(50);
 
-  value = (value + 10 )%256;
-  pwmsetservo(value);
-  pwmsetthrottle(value);
+  // value = (value + 10 )%256;
+  // pwmsetservo(value);
+  // pwmsetthrottle(value);
 
-  motordirtoggle();
+  // motordirtoggle();
 
-  delay(2000);
+  // delay(2000);
 }
 
 
@@ -169,11 +172,14 @@ void throttle(uint8_t togglePin, uint8_t motorPin, int8_t realthrottleVal, uint8
 {
   if (realthrottleVal < 0)
     {
-      digitalWrite(togglePin, HIGH);
+      // digitalWrite(togglePin, HIGH);
+      motordirhigh();
     }
   else
   {
-      digitalWrite(togglePin, LOW);
+      // digitalWrite(togglePin, LOW);
+    motordirlow();
   }
-  analogWrite(motorPin, unrealthrottleVal);
+  // analogWrite(motorPin, unrealthrottleVal);
+  pwmsetthrottle(unrealthrottleVal);
 }
